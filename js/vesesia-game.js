@@ -1,16 +1,26 @@
-let $canvas = $("#game-canvas");
+let $gamePanel = $("#game-panel");
 let $controlPanel = $("#control-panel");
 let $input = $("#input");
 
+let speed = 2;
+
 class Word {
     constructor(word){
-        this.x = Math.floor(Math.random() * ($canvas.height() - 40));
-        this.y = 10;
-        this.word = word;
+        this.x = Math.floor(Math.random() * $gamePanel.innerWidth()) + parseInt($gamePanel.css('margin-left').replace('px', ''));
+        this.y = 0;
+        this.word = word;   
+    }
+    move(){
+        var _this = this;
+        setInterval(function(){_this.y += speed}, 30);
     }
 }
 
 class Game {
+    constructor(){
+        this.words = ['my', 'name', 'is', 'mingon'];
+        this.activeWords = [];
+    }
     init() {   //버튼에 리스너를 다는 등의 작업을 하는 초기화 함수.
         let _this = this;
 
@@ -21,31 +31,54 @@ class Game {
 
         //입력창 리스너
         $input.on('keyup', function(event){
-            if(event.keyCode==13 || event.keyCode==32){
+            if(event.key === 'Enter' || event.key === ' '){
                 console.log($input.val());
                 $input.val("");
             }
         });
 
         //30ms마다 다시 그려준다.
-        //setInterval(function(){_this.repaint()}, 30);
+        setInterval(function(){_this.repaint()}, 30);
     }
 
     repaint() {
-        console.log("gg");
+        this.update();
     }
+    update(){
+        $gamePanel.empty();
 
+        for(var i=0;i<this.activeWords.length;i++){
+            var w = this.activeWords[i];
+
+            if(this.isFailed(w.y)){
+                this.activeWords.splice(i,1);
+            }
+
+            //단어를 div로 감싸 생성한다.
+            let wordDiv = $(`<div>${w.word}</div>`);
+            wordDiv.css('position','absolute');
+            wordDiv.css('left', w.x);
+            wordDiv.css('top', w.y);
+            wordDiv.css('font-size', '15px');
+
+            $gamePanel.append(wordDiv);
+        }
+    }
+    isFailed(y){
+        if(y >= $gamePanel.innerHeight())
+            return true;
+        return false;
+    }
     gameStart(){
         //word를 생성한다.
-        let word = new Word("mingon");
-        
-        //canvas에 그려준다. 
-        let context = $canvas.get(0).getContext("2d");
-        context.font = "20px Georia";
-        context.fillText(word.word, word.x, word.y, 40);
+        var wordInstance = new Word("mingon");
+        wordInstance.move();
+        this.activeWords.push(wordInstance);
 
-        console.log(word.x);
+        
+
         //word를 움직이게 한다.     
+        
 
     }
 };

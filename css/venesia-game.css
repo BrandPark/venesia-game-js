@@ -10,10 +10,7 @@ html, body{
     border-style: solid;
     border-color: red;
 }
-#game-canvas{
-    width:100%;
-    height:100%;
-}
+
 #control-panel-frame{
     height:30%;
     border-style: solid;
