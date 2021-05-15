@@ -16,11 +16,17 @@ class Word {
         this.y = 0;
         this.word = word;  
         this.interval = null; 
+
     }
 
     move(){
         var _this = this;
-        this.interval = setInterval(function(){_this.y += speed;console.log(_this.word + "살아있다")}, 30);
+        this.interval = setInterval(function(){_this.y += speed;}, 30);
+    }
+    intervalStop(){
+        let _this = this;
+        clearInterval(_this.interval);
+        console.log("stop : " + this.word);
     }
 }
 // ------------------- 게임 클래스 -------------------------------
@@ -30,55 +36,20 @@ class Game {
         this.activeWords = [];
         
     }
-    //버튼들에 리스너를 단다.
     init() {   
         let _this = this;
 
-        //게임시작버튼 리스너
         $("#game-start").on('click', function(){
-            //30ms마다 다시 그려준다.
             setInterval(function(){_this.repaint()}, 30);
             _this.gameStart();
         });
 
-        //입력창 리스너
         $input.on('keyup', function(event){
             if(event.key === 'Enter' || event.key === ' '){
-                //살아있는 단어들 중 입력한 단어가 있는지 찾아서 삭제한다.
                 _this.eraseWord($input.val());
                 $input.val("");
             }
         });
-    }
-
-    //game panel을 비우고 뿌려진 단어들을 다시 그려준다. 
-    repaint() {
-        $gamePanel.children().remove();
-
-        for(var i=0;i<this.activeWords.length;i++){
-            var w = this.activeWords[i];
-
-            if(this.isDropOnFloor(w.y)){
-                this.activeWords.splice(i,1);
-                var curFailed = parseInt($failed.text());
-                $failed.text(curFailed + 1);
-            }
-
-            //단어를 div로 감싸 생성한다.
-            let wordDiv = $(`<div>${w.word}</div>`);
-            wordDiv.css('position','absolute');
-            wordDiv.css('left', w.x);
-            wordDiv.css('top', w.y);
-            wordDiv.css('font-size', '15px');
-
-            $gamePanel.append(wordDiv);
-        }
-    }
-
-    isDropOnFloor(y){
-        if(y >= $gamePanel.innerHeight() - 10)
-            return true;
-        return false;
     }
 
     gameStart(){
@@ -96,8 +67,41 @@ class Game {
             _this.gameStartImpl();
 
         }, 500);
-
     }
+    
+    repaint() {
+        this.clearGamePanel();
+
+        for(var i=0;i<this.activeWords.length;i++){
+            var wordObj = this.activeWords[i];
+
+            if(!this.removeFailedWord(i, wordObj.y)) {
+                this.addWord(wordObj.word, wordObj.x, wordObj.y);
+            }
+        }
+    }
+
+    clearGamePanel(){
+        $gamePanel.children().remove();
+    }
+    removeFailedWord(index, y){
+        if(y >= $gamePanel.innerHeight() - 10){
+            this.activeWords.splice(index,1)[0].intervalStop();  
+            var curFailed = parseInt($failed.text());
+            $failed.text(curFailed + 1);
+            return true;   
+        }
+        return false;
+    }
+
+    addWord(word, x, y){
+        let wordDiv = $(`<div class='word'>${word}</div>`);
+        wordDiv.css('left', x);
+        wordDiv.css('top', y);
+        $gamePanel.append(wordDiv);
+    }
+
+    
 
     showScore(){
         let _this = this;
@@ -115,12 +119,11 @@ class Game {
             stop = false;
             _this.gameStart();
         });
+
         $scoreBoard.append($restartBtn);
         
-
         $input.blur();
         $frame.append($scoreBoard);
-
     }
 
     gameStartImpl(){
@@ -145,8 +148,7 @@ class Game {
         let curScore = parseInt($score.text());
         //단어가 있다면 삭제하고 점수 올리고 없다면 점수 깎기.
         if(index != -1){
-            this.activeWords.splice(index, 1);
-            
+            this.activeWords.splice(index, 1)[0].intervalStop();
             $score.text(curScore + 1);
         }
         else if(curScore > 0) {    
