@@ -18,10 +18,6 @@ html, body{
     border-style: solid;
     border-color: blue;
 }
-#control-panel{
-    border-style: solid;
-    border-color: blue;
-}
 
 #board{
     position: absolute;
