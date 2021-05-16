@@ -4,7 +4,7 @@ let $controlPanel = $("#control-panel");
 let $input = $("#input");
 let $score = $('#score');
 let $failed = $('#failed');
-
+let $board = $('#board');
 let speed = 2;
 let stop = false;
 
@@ -54,7 +54,7 @@ class Game {
 
     gameStart(){
         let _this = this;
-        
+        $input.focus();
         this.words = ['my', 'name', 'is', 'mingon'];
         
         let interval = setInterval(function(){
@@ -68,7 +68,7 @@ class Game {
 
         }, 500);
     }
-    
+
     repaint() {
         this.clearGamePanel();
 
@@ -84,6 +84,7 @@ class Game {
     clearGamePanel(){
         $gamePanel.children().remove();
     }
+
     removeFailedWord(index, y){
         if(y >= $gamePanel.innerHeight() - 10){
             this.activeWords.splice(index,1)[0].intervalStop();  
@@ -105,25 +106,27 @@ class Game {
 
     showScore(){
         let _this = this;
-
-        let $scoreBoard = $(`<div id='score-board' class='d-flex align-items-center flex-column'></div>`);
-    
         let $scoreDiv = $(`<div id='end-score'>점수 : ${$score.text()}</div>`);
-        $scoreBoard.append($scoreDiv);
-
         let $restartBtn = $(`<button id='restart-btn' class='btn btn-primary mt-sm-3'>다시 시작</button>`);
+
+        $board.css('visibility', 'visible');
+        $board.append($scoreDiv);
+        $board.append($restartBtn);
+        
         $restartBtn.on('click', function(){
-            $frame.children().remove("#score-board");
+            $board.css('visibility', 'hidden');
+            $board.children().remove();
+
             $score.text(0);
             $failed.text(0);
+
             stop = false;
             _this.gameStart();
         });
-
-        $scoreBoard.append($restartBtn);
         
+        $frame.append($board);
         $input.blur();
-        $frame.append($scoreBoard);
+        $restartBtn.focus();
     }
 
     gameStartImpl(){

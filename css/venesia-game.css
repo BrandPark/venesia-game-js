@@ -21,7 +21,7 @@ html, body{
     border-color: blue;
 }
 
-#score-board{
+#board{
     position: absolute;
     left: 0;
     top: 0;
